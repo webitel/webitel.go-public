@@ -1,0 +1,62 @@
+name: Deploy
+
+run-name: "${{ inputs.tag }}: ${{ inputs.commit-message }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit-message:
+        type: string
+        required: true
+        description: Latest commit message to include in run name.
+
+      triggered-branch:
+        type: string
+        required: true
+        description: Triggered branch from original repository to calculate latest version.
+
+      tag:
+        type: string
+        required: false
+        description: Package version to create tag.
+
+      repository-environment:
+        type: string
+        required: true
+        description: Linked environment for upload build to repository (eg. acceptance, v25.04-releases, ...).
+
+      deb-package-pattern:
+        type: string
+        required: true
+        description: A path pattern to artifact, that should be uploaded to environments and installed.
+
+      deb-component:
+        type: string
+        required: false
+        default: dev
+        description: Component of the APT repository.
+
+      artifact-actions-run-id:
+        type: string
+        required: false
+        description: |
+          The id of the workflow run where the desired download artifact was uploaded from.
+          If artifact-github-token is specified, this is the run that artifacts will be downloaded from.
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@5577917489fd3fb48b5f873e22bff1974be826f4
+    permissions: { contents: write }
+    secrets: inherit
+    with:
+      triggered-branch: ${{ inputs.triggered-branch }}
+      tag: ${{ inputs.tag }}
+      repository-environment: ${{ inputs.repository-environment }}
+      deb-package-pattern: ${{ inputs.deb-package-pattern }}
+      deb-component: ${{ inputs.deb-component }}
+      deb-codename: ${{ vars.DEB_CODENAME }}
+      deb-aws-bucket-name: ${{ vars.DEB_AWS_BUCKET_NAME }}
+      deb-aws-bucket-region: ${{ vars.DEB_AWS_DEFAULT_REGION }}
+      artifact-repository: webitel/webitel.go
+      artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}
