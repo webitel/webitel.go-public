@@ -1,6 +1,6 @@
-name: Deploy
+name: Deploy (webitel-core)
 
-run-name: "${{ inputs.tag }}: ${{ inputs.commit-message }}"
+run-name: "${{ inputs.triggered-branch }}: ${{ inputs.commit-message }}"
 
 on:
   workflow_dispatch:
@@ -25,11 +25,6 @@ on:
         required: true
         description: Linked environment for upload build to repository (eg. acceptance, v25.04-releases, ...).
 
-      deb-package-pattern:
-        type: string
-        required: true
-        description: A path pattern to artifact, that should be uploaded to environments and installed.
-
       deb-component:
         type: string
         required: false
@@ -43,17 +38,18 @@ on:
           The id of the workflow run where the desired download artifact was uploaded from.
           If artifact-github-token is specified, this is the run that artifacts will be downloaded from.
 
+permissions: {}
+
 jobs:
   deploy:
     name: Deploy
-    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@5577917489fd3fb48b5f873e22bff1974be826f4
-    permissions: { contents: write }
+    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@v1.0.6
     secrets: inherit
     with:
       triggered-branch: ${{ inputs.triggered-branch }}
       tag: ${{ inputs.tag }}
       repository-environment: ${{ inputs.repository-environment }}
-      deb-package-pattern: ${{ inputs.deb-package-pattern }}
+      deb-package-pattern: "webitel-core*.deb"
       deb-component: ${{ inputs.deb-component }}
       deb-codename: ${{ vars.DEB_CODENAME }}
       deb-aws-bucket-name: ${{ vars.DEB_AWS_BUCKET_NAME }}
