@@ -1,6 +1,6 @@
 name: Deploy (webitel-core)
 
-run-name: "webitel-core@${{ inputs.triggered-branch }}: ${{ inputs.commit-message }}"
+run-name: "${{ inputs.commit-message }}"
 
 on:
   workflow_dispatch:
@@ -38,12 +38,16 @@ on:
           The id of the workflow run where the desired download artifact was uploaded from.
           If artifact-github-token is specified, this is the run that artifacts will be downloaded from.
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   deploy:
     name: Deploy
     uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@v1.0.6
+    permissions:
+      contents: write
+
     secrets: inherit
     with:
       triggered-branch: ${{ inputs.triggered-branch }}

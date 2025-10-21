@@ -1,6 +1,6 @@
 name: Deliver (webitel-core)
 
-run-name: "webitel-core@${{ inputs.triggered-branch }} - deliver package: ${{ inputs.commit-message }}"
+run-name: "deliver package: ${{ inputs.commit-message }}"
 
 on:
   workflow_dispatch:
