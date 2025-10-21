@@ -58,5 +58,5 @@ jobs:
       deb-codename: ${{ vars.DEB_CODENAME }}
       deb-aws-bucket-name: ${{ vars.DEB_AWS_BUCKET_NAME }}
       deb-aws-bucket-region: ${{ vars.DEB_AWS_DEFAULT_REGION }}
-      artifact-repository: webitel/webitel.go
+      artifact-repository: webitel.go
       artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}
