@@ -1,6 +1,6 @@
 name: Deploy (webitel-core)
 
-run-name: "${{ inputs.triggered-branch }}: ${{ inputs.commit-message }}"
+run-name: "webitel-core@${{ inputs.triggered-branch }}: ${{ inputs.commit-message }}"
 
 on:
   workflow_dispatch:
