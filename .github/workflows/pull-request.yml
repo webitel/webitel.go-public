@@ -35,6 +35,10 @@ permissions:
   id-token: write
   actions: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.triggered-branch }}
+  cancel-in-progress: true
+
 jobs:
   publish:
     name: Publish (${{ matrix.arch }}/${{ matrix.codename }})

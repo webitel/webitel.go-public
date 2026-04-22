@@ -45,6 +45,10 @@ permissions:
   id-token: write
   actions: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.triggered-branch }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy
