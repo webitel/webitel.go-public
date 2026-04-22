@@ -1,6 +1,6 @@
-name: Deliver (webitel-core)
+name: Workflow (webitel-core)
 
-run-name: "deliver package: ${{ inputs.commit-message }}"
+run-name: "${{ inputs.commit-message }}"
 
 on:
   workflow_dispatch:
@@ -13,7 +13,12 @@ on:
       triggered-branch:
         type: string
         required: true
-        description: Triggered branch from original repository.
+        description: Triggered branch from original repository to calculate latest version.
+
+      repository-environment:
+        type: string
+        required: true
+        description: Linked environment for upload build to repository (eg. acceptance, v25.04-releases, ...).
 
       artifact-actions-run-id:
         type: string
@@ -32,8 +37,7 @@ on:
 
       deb-component:
         type: string
-        required: false
-        default: dev
+        required: true
         description: Component of the APT repository (e.g., dev, v25.04-releases).
 
 permissions:
@@ -42,8 +46,22 @@ permissions:
   actions: read
 
 jobs:
+  deploy:
+    name: Deploy
+    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@v2
+    secrets: inherit
+    with:
+      triggered-branch: ${{ inputs.triggered-branch }}
+      repository-environment: ${{ inputs.repository-environment }}
+      deb-package-pattern: "webitel-core*.deb"
+      github-app-client-id: ${{ vars.DELIVERY_BOT_CLIENT_ID }}
+      artifact-repository-owner: ${{ github.repository_owner }}
+      artifact-repository: webitel.go
+      artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}
+
   publish:
     name: Publish (${{ matrix.arch }}/${{ matrix.codename }})
+    needs: [ deploy ]
     strategy:
       matrix:
         arch: ${{ fromJSON(inputs.arch-matrix) }}
@@ -53,6 +71,7 @@ jobs:
     secrets: inherit
     with:
       arch: ${{ matrix.arch }}
+      repository-environment: ${{ inputs.repository-environment }}
       deb-package-pattern: "webitel-core*.deb"
       deb-component: ${{ inputs.deb-component }}
       deb-codename: ${{ matrix.codename }}

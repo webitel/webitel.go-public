@@ -1,0 +1,60 @@
+name: PR (webitel-core)
+
+run-name: "${{ inputs.commit-message }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit-message:
+        type: string
+        required: true
+        description: Latest commit message to include in run name.
+
+      triggered-branch:
+        type: string
+        required: true
+        description: Triggered branch from original repository.
+
+      artifact-actions-run-id:
+        type: string
+        required: true
+        description: The id of the workflow run where the desired download artifact was uploaded from.
+
+      arch-matrix:
+        type: string
+        required: true
+        description: JSON array of target architectures (e.g., ["amd64","arm64"]).
+
+      codename-matrix:
+        type: string
+        required: true
+        description: JSON array of Debian codenames (e.g., ["bookworm","trixie"]).
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+jobs:
+  publish:
+    name: Publish (${{ matrix.arch }}/${{ matrix.codename }})
+    strategy:
+      matrix:
+        arch: ${{ fromJSON(inputs.arch-matrix) }}
+        codename: ${{ fromJSON(inputs.codename-matrix) }}
+
+    uses: webitel/reusable-workflows/.github/workflows/_publish-deb.yml@v2
+    secrets: inherit
+    with:
+      arch: ${{ matrix.arch }}
+      deb-package-pattern: "webitel-core*.deb"
+      deb-component: dev
+      deb-codename: ${{ matrix.codename }}
+      deb-s3-bucket-name: ${{ vars.DEB_S3_BUCKET_NAME }}
+      deb-s3-bucket-region: ${{ vars.DEB_S3_DEFAULT_REGION }}
+      deb-s3-endpoint: ${{ vars.DEB_S3_ENDPOINT }}
+      deb-s3-force-path-style: ${{ vars.DEB_S3_FORCE_PATH_STYLE == 'true' }}
+      github-app-client-id: ${{ vars.DELIVERY_BOT_CLIENT_ID }}
+      artifact-repository-owner: ${{ github.repository_owner }}
+      artifact-repository: webitel.go
+      artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}
