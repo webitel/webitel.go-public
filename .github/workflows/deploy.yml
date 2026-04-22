@@ -15,21 +15,10 @@ on:
         required: true
         description: Triggered branch from original repository to calculate latest version.
 
-      tag:
-        type: string
-        required: false
-        description: Package version to create tag.
-
       repository-environment:
         type: string
         required: true
         description: Linked environment for upload build to repository (eg. acceptance, v25.04-releases, ...).
-
-      deb-component:
-        type: string
-        required: false
-        default: dev
-        description: Component of the APT repository.
 
       artifact-actions-run-id:
         type: string
@@ -44,20 +33,13 @@ permissions:
 jobs:
   deploy:
     name: Deploy
-    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@v1.0.6
-    permissions:
-      contents: write
-
+    uses: webitel/reusable-workflows/.github/workflows/_deploy.yml@v2
     secrets: inherit
     with:
       triggered-branch: ${{ inputs.triggered-branch }}
-      tag: ${{ inputs.tag }}
       repository-environment: ${{ inputs.repository-environment }}
       deb-package-pattern: "webitel-core*.deb"
-      deb-component: ${{ inputs.deb-component }}
-      deb-codename: ${{ vars.DEB_CODENAME }}
-      deb-aws-bucket-name: ${{ vars.DEB_AWS_BUCKET_NAME }}
-      deb-aws-bucket-region: ${{ vars.DEB_AWS_DEFAULT_REGION }}
-      github-app-id: ${{ vars.DELIVERY_BOT_APP_ID }}
+      github-app-client-id: ${{ vars.DELIVERY_BOT_CLIENT_ID }}
+      artifact-repository-owner: ${{ github.repository_owner }}
       artifact-repository: webitel.go
       artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}

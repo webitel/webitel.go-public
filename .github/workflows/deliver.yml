@@ -20,6 +20,23 @@ on:
         required: true
         description: The id of the workflow run where the desired download artifact was uploaded from.
 
+      arch:
+        type: string
+        required: false
+        default: amd64
+        description: Package architecture (e.g., amd64, arm64).
+
+      deb-component:
+        type: string
+        required: false
+        default: dev
+        description: Component of the APT repository (e.g., dev, v25.04-releases).
+
+      deb-codename:
+        type: string
+        required: true
+        description: Debian codename (e.g., bookworm).
+
 permissions:
   contents: read
   id-token: write
@@ -28,21 +45,18 @@ permissions:
 jobs:
   publish:
     name: Publish .deb package
-    uses: webitel/reusable-workflows/.github/workflows/_publish-deb.yml@v1.0.6
-    secrets:
-      DEB_AWS_ACCESS_KEY_ID: ${{ secrets.DEB_AWS_ACCESS_KEY_ID }}
-      DEB_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEB_AWS_SECRET_ACCESS_KEY }}
-      REPO_SIGNING_KEY: ${{ secrets.REPO_SIGNING_KEY }}
-      REPO_SIGNING_KEY_PASSPHRASE: ${{ secrets.REPO_SIGNING_KEY_PASSPHRASE }}
-      DELIVERY_BOT_APP_PEM: ${{ secrets.DELIVERY_BOT_APP_PEM }}
-
+    uses: webitel/reusable-workflows/.github/workflows/_publish-deb.yml@v2
+    secrets: inherit
     with:
+      arch: ${{ inputs.arch }}
       deb-package-pattern: "webitel-core*.deb"
-      deb-component: dev
-      deb-codename: ${{ vars.DEB_CODENAME }}
-      deb-aws-bucket-name: ${{ vars.DEB_AWS_BUCKET_NAME }}
-      deb-aws-bucket-region: ${{ vars.DEB_AWS_DEFAULT_REGION }}
-      github-app-id: ${{ vars.DELIVERY_BOT_APP_ID }}
+      deb-component: ${{ inputs.deb-component }}
+      deb-codename: ${{ inputs.deb-codename }}
+      deb-s3-bucket-name: ${{ vars.DEB_S3_BUCKET_NAME }}
+      deb-s3-bucket-region: ${{ vars.DEB_S3_DEFAULT_REGION }}
+      deb-s3-endpoint: ${{ vars.DEB_S3_ENDPOINT }}
+      deb-s3-force-path-style: ${{ vars.DEB_S3_FORCE_PATH_STYLE == 'true' }}
+      github-app-client-id: ${{ vars.DELIVERY_BOT_CLIENT_ID }}
       artifact-repository-owner: ${{ github.repository_owner }}
       artifact-repository: webitel.go
       artifact-actions-run-id: ${{ inputs.artifact-actions-run-id }}
